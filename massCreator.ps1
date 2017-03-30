@@ -54,8 +54,7 @@ foreach ($cell in $CSVdata)
       $mgrOU = ($mgr.DistinguishedName -split ",", 2)[1]
       $new_Title = $cell.'Title / Position'.trim()
       $new_Department = $cell.Department.trim()
-      $new_preDescription = $cell.preDescription.trim()
-      $new_Description = 'AA/B//CCCCC/' + $new_preDescription + ' - ' + $new_Department + ' - ' + $timestamp
+      $new_Description = 'AA/B//CCCCC/' + $new_Department + ' - ' + $timestamp
       $new_Notes = $cell.Notes.trim()
       $enable_afterCreation = $true
       $change_passAtLogon = $true
