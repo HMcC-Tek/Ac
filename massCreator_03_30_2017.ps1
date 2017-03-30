@@ -59,7 +59,7 @@ foreach ($cell in $CSVdata)
       $change_passAtLogon = $true
       $accountExpires = ([DateTime]($cell.'Account Expiration')).AddDays(1)
 
-      $cloneADInstance = Get-Aduser $template_sAMAccountName -Properties memberOf
+      $cloneADInstance = Get-Aduser $template_sAMAccountName -Properties city,company,country,postalCode,ScriptPath,State,StreetAddress,MemberOf
 
       $params = @{'SamAccountName' = $new_sAMAccountName;
                   'Instance' = $cloneADInstance;
@@ -81,10 +81,14 @@ foreach ($cell in $CSVdata)
       # Create the new user account using template account
       Get-ADUser -Filter {SamAccountName -eq $template_sAMAccountName} -Properties city,company,country,postalCode,ScriptPath,State,StreetAddress | New-ADUser -Name $new_Name @params
 
-      # Mirror template member of
-      $cloneADInstance.Memberof | % { Add-ADGroupMember $_ $new_sAMAccountName }
-
-        # $AdditionalGroups | Add-ADGroupMember -Members $new_sAMAccountName
+      # Mirror template Security Groups
+      $cloneADInstance.MemberOf |
+      ForEach-Object {
+			  $_ | Add-ADGroupMember -Members $new_sAMAccountName
+		  }
+      
+      # Additional Groups to add
+      # $AdditionalGroups | Add-ADGroupMember -Members $new_sAMAccountName
 
       # Move the new user to Manager's OU
       Get-ADUser $new_sAMAccountName | Move-ADObject -TargetPath $mgrOU
@@ -100,7 +104,7 @@ foreach ($cell in $CSVdata)
 
       Set-ADUser -Identity $new_sAMAccountName -HomeDrive "$new_DriveLetter" -HomeDirectory "$new_HomeDir"
 
-      Set-ADAccountExpiration $new_sAMAccountName -DateTime $accountExpires
+      Set-ADAccountExpiration $new_sAMAccountName -DateTime $accountExpires -Server (Get-ADDomain).PDCEmulator
 
       Enable-Mailbox -Identity $new_sAMAccountName
 
