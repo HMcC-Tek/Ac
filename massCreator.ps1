@@ -11,7 +11,9 @@ Write-Host Active Directory Module is ready for commands. -backgroundcolor green
 Start-Sleep -s 1
 }
 
-$Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri http://(URL)/PowerShell/ -Authentication Kerberos
+$cred = Get-Credential $env:userdomain\$env:username
+
+$Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri http://(URL)/PowerShell/ -Authentication Kerbeross -Credential $cred
 Import-PSSession $Session
 
 $timestamp = Get-Date -Format 'MM/dd/yyyy - h:mm:ss tt'
